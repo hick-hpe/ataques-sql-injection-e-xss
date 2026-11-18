@@ -40,8 +40,6 @@ def login():
         usuario = request.form.get('usuario')
         senha = request.form.get('senha')
 
-        print('creds:', usuario, senha)
-
         conexao = conectar_banco()
         cursor = conexao.cursor(dictionary=True)
 
@@ -75,10 +73,33 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/posts/criar/', methods=['GET'])
+@app.route('/posts/criar/', methods=['GET', 'POST'])
 def criar_post():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        usuario_id = session['usuario_id']
+        titulo = request.form.get('titulo')
+        conteudo = request.form.get('conteudo')
+
+        conexao = conectar_banco()
+        cursor = conexao.cursor()
+
+        # VULNERÁVEL: concatenação direta
+        query = f"""
+            INSERT INTO posts (titulo, conteudo, usuario_id)
+            VALUES ('{titulo}', '{conteudo}', '{usuario_id}')
+        """
+
+        cursor.execute(query)
+        conexao.commit()
+
+        cursor.close()
+        conexao.close()
+
+        flash('Publicação criada com sucesso!', 'success')
+        return redirect(url_for('listar_posts'))
 
     return render_template('criar_post.html')
 
@@ -88,7 +109,24 @@ def listar_posts():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
 
-    return render_template('posts.html')
+    conexao = conectar_banco()
+    cursor = conexao.cursor(dictionary=True)
+
+    query = """
+        SELECT posts.*, usuarios.usuario
+        FROM posts
+        INNER JOIN usuarios
+        ON posts.usuario_id = usuarios.id
+        ORDER BY posts.data_criacao DESC
+    """
+
+    cursor.execute(query)
+    posts = cursor.fetchall()
+
+    cursor.close()
+    conexao.close()
+
+    return render_template('posts.html', posts=posts)
 
 
 if __name__ == '__main__':
