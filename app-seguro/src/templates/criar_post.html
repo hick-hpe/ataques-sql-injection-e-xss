@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Criar publicação</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-semibold" href="/posts">
+                Publicações
+            </a>
+
+            <div class="d-flex align-items-center gap-3">
+
+                <!-- Perfil -->
+                <div class="d-flex align-items-center gap-2">
+
+                    <div class="rounded-circle bg-primary text-white
+                            d-flex align-items-center justify-content-center fw-semibold"
+                        style="width: 36px; height: 36px; font-size: 15px;">
+                        {{ session['usuario'][0]|upper }}
+                    </div>
+
+                    <span class="small fw-semibold">
+                        {{ session['usuario'] }}
+                    </span>
+
+                </div>
+
+                <form action="/logout" method="POST">
+                    <button class="btn btn-outline-secondary btn-sm">
+                        Sair
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+
+                        <h1 class="h3 mb-4">Criar publicação</h1>
+
+                        <form action="/posts/criar" method="POST">
+
+                            <div class="mb-3">
+                                <label for="titulo" class="form-label">Título</label>
+                                <input type="text" class="form-control" id="titulo" name="titulo"
+                                    placeholder="Digite o título da publicação" required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="conteudo" class="form-label">Conteúdo</label>
+                                <textarea class="form-control" id="conteudo" name="conteudo" rows="6"
+                                    placeholder="Escreva sua publicação..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                Publicar
+                            </button>
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+</html>

@@ -11,7 +11,6 @@ from flask import (
     session,
     flash
 )
-# from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
@@ -23,7 +22,7 @@ def conectar_banco():
         host=os.getenv("MYSQL_HOST", "db"),
         user=os.getenv("MYSQL_USER", "app_user"),
         password=os.getenv("MYSQL_PASSWORD", "senha_app"),
-        database=os.getenv("MYSQL_DATABASE", "app_posts")
+        database=os.getenv("MYSQL_DATABASE", "app_posts_vulneravel")
     )
 
 
@@ -41,19 +40,23 @@ def login():
         senha = request.form.get('senha')
 
         conexao = conectar_banco()
-        cursor = conexao.cursor(dictionary=True)
 
-        query = f"""
-            SELECT * FROM usuarios
-            WHERE usuario = '{usuario}'
-            AND senha = '{senha}'
-        """
+        try:
+            cursor = conexao.cursor(dictionary=True)
 
-        cursor.execute(query)
-        resultado = cursor.fetchall()[0]
+            query = f"""
+                SELECT * FROM usuarios
+                WHERE usuario = '{usuario}'
+                AND senha = '{senha}'
+            """
 
-        cursor.close()
-        conexao.close()
+            cursor.execute(query)
+            resultado = cursor.fetchone()
+
+            cursor.close()
+
+        finally:
+            conexao.close()
 
         if resultado:
             session['usuario_id'] = resultado['id']

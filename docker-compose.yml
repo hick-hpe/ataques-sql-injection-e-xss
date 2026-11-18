@@ -5,7 +5,7 @@ services:
     container_name: mysql_lab
     environment:
       MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: app_posts
+      MYSQL_DATABASE: app_posts_vulneravel
       MYSQL_USER: app_user
       MYSQL_PASSWORD: senha_app
     ports:
@@ -14,10 +14,11 @@ services:
       - mysql_data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot123"]
+      test: ["CMD-SHELL", "mysqladmin ping --protocol=TCP -h 127.0.0.1 -P 3306 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
+      start_period: 30s
 
   app-vulneravel:
     build: .
@@ -31,29 +32,29 @@ services:
       MYSQL_HOST: db
       MYSQL_USER: app_user
       MYSQL_PASSWORD: senha_app
-      MYSQL_DATABASE: app_posts
+      MYSQL_DATABASE: app_posts_vulneravel
       SECRET_KEY: chave-vulneravel
     depends_on:
       db:
         condition: service_healthy
 
-  # app-seguro:
-  #   build: .
-  #   container_name: app_seguro
-  #   command: python src/main.py
-  #   ports:
-  #     - "5001:5000"
-  #   volumes:
-  #     - ./app-seguro:/app
-  #   environment:
-  #     MYSQL_HOST: db
-  #     MYSQL_USER: app_user
-  #     MYSQL_PASSWORD: senha_app
-  #     MYSQL_DATABASE: app_posts
-  #     SECRET_KEY: chave-segura
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
+  app-seguro:
+    build: .
+    container_name: app_seguro
+    command: python src/main.py
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./app-seguro:/app
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: senha_app
+      MYSQL_DATABASE: app_posts_seguro
+      SECRET_KEY: chave-segura
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   mysql_data:
